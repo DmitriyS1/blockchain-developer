@@ -45,7 +45,7 @@ contract GovernanceToken {
 
     // transfer ether to particular address
     function transfer(address _to, uint _amount) {
-        // Как произвести трансфер на конкретный адрес?
+        _to.transfer(_amount);
     }
 
     // Add new candidate to the candidates set
