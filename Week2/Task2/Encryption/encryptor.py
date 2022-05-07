@@ -16,7 +16,10 @@ def encrypt(message: str) -> bytes:
     encrypted = encryptor.encrypt(message.encode())
     # with open("encrypted_.txt", "wb") as f:
     #     f.write(encrypted)
+    print('FINISHED. Copy message inside the quotes')
+    print('_________________________________________')
     print(binascii.hexlify(encrypted))
+    print('_________________________________________')
     return encrypted
 
 

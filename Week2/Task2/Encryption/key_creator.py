@@ -6,7 +6,7 @@ def generate_keys():
     pubKey = keyPair.publickey()
     # print(f"Public key:  (n={hex(pubKey.n)}, e={hex(pubKey.e)})")
     pubKeyPEM = pubKey.exportKey()
-    print("Save keys in safe place.\nPUBLIC_KEY:")
+    print("Save keys in safe place. NOTE: Please, remove new lines, your key should be one line string.\nPUBLIC_KEY:")
     print(pubKeyPEM.decode('ascii'))
 
     # print(f"Private key: (n={hex(pubKey.n)}, d={hex(keyPair.d)})")
