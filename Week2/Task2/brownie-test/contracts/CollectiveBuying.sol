@@ -1,12 +1,19 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
 contract CollectiveBuying {
-    address owner = msg.sender;
-    bytes[] asset;
+    address private owner;
+    bytes[] asset; // заготовка для цифрового актива
 
     mapping(uint256 => bool) usedNonces;
 
-    constructor() payable {}
+    constructor() {
+        owner = msg.sender;
+    }
+
+
+    function getPublicKey() public view returns (bytes32) {
+        return keccak256(abi.encodePacked(this.owner));
+    }
 
     function order(uint256 amount, uint256 nonce, bytes memory signature) external {
         require(!usedNonces[nonce]);
