@@ -1,31 +1,66 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity 0.6.12;
 contract CollectiveBuying {
     address private owner;
-    bytes[] asset; // заготовка для цифрового актива
+    string ciphered_buyers_adresses;
+    string public_key;
+    bytes[] asset;
 
-    mapping(uint256 => bool) usedNonces;
+    address[] buyers_addresses;
+    uint256 buyers_count;
+    
+    mapping(uint256 => bool) private usedNonces;
 
-    constructor() {
+    constructor() public {
         owner = msg.sender;
+        public_key = "";
     }
 
 
-    function getPublicKey() public view returns (bytes32) {
-        return keccak256(abi.encodePacked(this.owner));
+    function getPublicKey() public view returns (string memory) {
+        // require(keccak256(abi.encodePacked(public_key)) != keccak256(abi.encodePacked("")));
+        return public_key;
     }
 
-    function order(uint256 amount, uint256 nonce, bytes memory signature) external {
-        require(!usedNonces[nonce]);
-        usedNonces[nonce] = true;
-
-        // this recreates the message that was signed on the client
-        bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
-
-        require(recoverSigner(message, signature) == owner);
-
-        payable(msg.sender).transfer(amount);
+    function initPublicKey(string memory pub_key) public {
+        require(msg.sender == owner);
+        public_key = pub_key;
     }
+
+    function initOrder(string memory _order_adresses) public payable {
+        if (msg.value == 2000000000000000) {
+            ciphered_buyers_adresses = _order_adresses;
+        }
+    }
+
+    function getOrderAddresses() public view returns (string memory) {
+        require(msg.sender == owner);
+        return ciphered_buyers_adresses;
+    }
+
+    function transferAssetToAddresses(address[] memory addresses) public {
+        require(msg.sender == owner);
+        for (uint i = 0; i < addresses.length; i++) {
+            buyers_addresses.push(addresses[i]);
+        }
+    }
+
+    function getBuyerAddresses() public view returns (address[] memory) {
+        require(msg.sender == owner);
+        return buyers_addresses;
+    }
+
+    // function order(uint256 amount, uint256 nonce, bytes memory signature) external {
+    //     require(!usedNonces[nonce]);
+    //     usedNonces[nonce] = true;
+
+    //     // this recreates the message that was signed on the client
+    //     bytes32 message = prefixed(keccak256(abi.encodePacked(msg.sender, amount, nonce, this)));
+
+    //     require(recoverSigner(message, signature) == owner);
+
+    //     payable(msg.sender).transfer(amount);
+    // }
 
     /// destroy the contract and reclaim the leftover funds.
     // function shutdown() external {
