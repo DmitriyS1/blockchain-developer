@@ -16,7 +16,7 @@ contract VulnerableOne {
 		uint256 ether_balance;
     }
 
-    mapping (address => UserInfo) public users_map;
+    mapping (address => UserInfo) public users_map; // Эти данные доступны любому пользователю и он может получить адреса и балансы
 	mapping (address => bool) is_super_user;
 	address[] users_list;
 	modifier onlySuperUser() {
@@ -35,7 +35,7 @@ contract VulnerableOne {
         /* 
             1) Публичная функция, нет никаких ограничений на кол-во суперпользователей. Возможна DDOS атака и большой счет за газ.
             2) Кто угодно может стать суперпользователем. Скорее всего подразумевалось другое поведение.
-            3) 
+            3) Нет проверки, что пользователь уже существует. Можно заполнять массив с одного и того же аккаунта, что облегчает работу потенциальному взломщику
 
         */
 		is_super_user[_new_super_user] = true;
@@ -48,9 +48,7 @@ contract VulnerableOne {
 
 	function add_new_user(address _new_user) public onlySuperUser {
         /*
-            1) Функция не соответствует описанию контракта. Любой пользователь может добавить нового пользователя.
-            2) Нет ограничения на кол-во пользователей. Возможна DDOS атака и большой счет за газ.
-            3) 
+            1) Нет ограничения на кол-во пользователей. Возможна DDOS атака и большой счет за газ. 
          */
 		require(users_map[_new_user].created == 0);
 		users_map[_new_user] = UserInfo({ created: now, ether_balance: 0 });
@@ -59,7 +57,7 @@ contract VulnerableOne {
 	
 	function remove_user(address _remove_user) public {
         /*
-            1) Любой пользователь может удалить всех и 
+            1) Любой пользователь может удалить всех
          */
 		require(users_map[msg.sender].created != 0);
 		delete(users_map[_remove_user]);
@@ -75,7 +73,7 @@ contract VulnerableOne {
 	}
 
 	function withdraw() public {
-        msg.sender.transfer(users_map[msg.sender].ether_balance);
+        msg.sender.transfer(users_map[msg.sender].ether_balance); // Reentracy атака возможна, т.к. пока транзакция не выполнится, можно вызвать данный метод несколько раз
 		users_map[msg.sender].ether_balance = 0;
 	}
 
