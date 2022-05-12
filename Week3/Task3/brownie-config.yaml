@@ -1,0 +1,14 @@
+networks:
+  default: mainnet-fork
+  mainnet-fork:
+    cmd_settings:
+      unlock:
+        - 0xab5801a7d398351b8be11c439e05c5b3259aec9b
+
+dependencies:
+  - OpenZeppelin/openzeppelin-contracts@4.4.0
+compiler:
+  solc:
+    version: "0.8.0"
+    remappings:
+      - '@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.4.0'
