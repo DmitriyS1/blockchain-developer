@@ -12,36 +12,41 @@ contract Election {
         uint256 votes;
     }
 
-    ElectionToken token;
-    Candidate[] public candidates;
-    uint8 private candidateCount;
+    struct Voter {
+        bool isVoted;
+        uint8 candidateNumber;
+    }
 
+    // Setting variables
     uint8 private constant candidatesLimit = 10;
-
-    bool private isElectionAllowed = true;
-    bool private isElectionFinished = false;
+    bool private isElectionAllowed;
+    bool private isElectionFinished;
     address private owner;
     address private tokenAddress;
-    string private winner;
+
+    mapping(address => Voter) public voters;
+    Candidate[] public candidates;
+    uint8 public candidateCount;
+
+    string public winner;
 
     constructor(address electionTokenAddress) {
-        candidates = new Candidate[](candidatesLimit);
         tokenAddress = electionTokenAddress;
         candidateCount = 0;
         owner = msg.sender;
         winner = "";
+        isElectionAllowed = false;
+        isElectionFinished = true;
     }
 
-    function addCandidate(string memory name) public {
+    function addCandidate(string calldata name) public {
         require(candidates.length < candidatesLimit, "Candidates limit reached");
         candidateCount += 1;
-        candidates[candidateCount - 1].name = name;
-        candidates[candidateCount - 1].number = candidateCount - 1;
-        candidates[candidateCount - 1].votes = 0;
-    }
-
-    function getCandidates() public view returns (Candidate[] memory) {
-        return candidates;
+        candidates.push(Candidate({
+            number: candidateCount - 1,
+            name: name,
+            votes: 0
+        }));
     }
 
     function electCandidate(uint8 number) public {
@@ -49,43 +54,49 @@ contract Election {
         require(candidateCount > 0, "No candidates added");
         require(number >= 0 && number < candidatesLimit, "Candidate number out of range");
         require(candidates[number].number == number, "Candidate number is not valid");
+        require(!voters[msg.sender].isVoted, "You already voted");
 
         isElectionAllowed = false; // how to use finite state machine here and not a mutex?
+        voters[msg.sender].isVoted = true;
+        voters[msg.sender].candidateNumber = number;
         candidates[number].votes += ERC20(tokenAddress).balanceOf(msg.sender);
         isElectionAllowed = true;
     }
 
     function startElection() public {
+        require(isElectionFinished, "Election is already started");
         require(msg.sender == owner, "Only owner can start election");
         isElectionFinished = false;
+        isElectionAllowed = true;
         winner = "";
-        candidates = new Candidate[](candidatesLimit);
     }
 
     function endElection() public {
         require(msg.sender == owner, "Only owner can end election");
         isElectionFinished = true;
+        isElectionAllowed = false;
     }
 
-    function getWinner() public returns (string memory) {
-        require(!isElectionFinished, "Election is not finished");
-        require(isElectionAllowed, "Election in process");
+    function getWinner() public {
+        require(isElectionFinished, "Election is not finished");
+        require(!isElectionAllowed, "Election in process");
 
+        winner = candidates[0].name;
         if (keccak256(bytes(winner)) != keccak256(bytes(""))){
-            return winner;
+            return ;
         }
 
-        Candidate storage _winner = Candidate(candidates[0].number, candidates[0].name, candidates[0].votes);
-        // string storage _winnerName = candidates[0].name;
-        // uint storage _winnerVotes = candidates[0].votes;
         for (uint8 i = 1; i < candidateCount; i++) {
-            if (candidates[i].votes > _winner.votes) {
-                _winner.name = candidates[i].name;
-                _winner.votes = candidates[i].votes;
+            if (candidates[i].votes > candidates[0].votes) {
+                candidates[0].name = candidates[i].name;
+                candidates[0].votes = candidates[i].votes;
             }
         }
 
-        winner = _winner.name;
+        winner = candidates[0].name;
+    }
+
+    function seeWinner() public view returns (string memory) {
         return winner;
     }
 }
