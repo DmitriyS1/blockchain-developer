@@ -22,13 +22,14 @@ contract Election {
     bool private isElectionFinished = false;
     address private owner;
     address private tokenAddress;
-    Candidate private winner;
+    string private winner;
 
     constructor(address electionTokenAddress) {
         candidates = new Candidate[](candidatesLimit);
         tokenAddress = electionTokenAddress;
         candidateCount = 0;
         owner = msg.sender;
+        winner = "";
     }
 
     function addCandidate(string memory name) public {
@@ -57,6 +58,8 @@ contract Election {
     function startElection() public {
         require(msg.sender == owner, "Only owner can start election");
         isElectionFinished = false;
+        winner = "";
+        candidates = new Candidate[](candidatesLimit);
     }
 
     function endElection() public {
@@ -64,22 +67,25 @@ contract Election {
         isElectionFinished = true;
     }
 
-    function getWinner() public returns (Candidate memory) {
+    function getWinner() public returns (string memory) {
         require(!isElectionFinished, "Election is not finished");
         require(isElectionAllowed, "Election in process");
 
-        if (keccak256(bytes(winner.name)) != keccak256(bytes(""))){
-            return Candidate(winner.number, winner.name, winner.votes);
+        if (keccak256(bytes(winner)) != keccak256(bytes(""))){
+            return winner;
         }
 
-        Candidate memory _winner = candidates[0];
+        Candidate storage _winner = Candidate(candidates[0].number, candidates[0].name, candidates[0].votes);
+        // string storage _winnerName = candidates[0].name;
+        // uint storage _winnerVotes = candidates[0].votes;
         for (uint8 i = 1; i < candidateCount; i++) {
-            if (candidates[i].votes > winner.votes) {
-                _winner = Candidate(candidates[i].number, candidates[i].name, candidates[i].votes);
+            if (candidates[i].votes > _winner.votes) {
+                _winner.name = candidates[i].name;
+                _winner.votes = candidates[i].votes;
             }
         }
 
-        winner = _winner;
-        return Candidate(winner.number, winner.name, winner.votes);
+        winner = _winner.name;
+        return winner;
     }
 }
