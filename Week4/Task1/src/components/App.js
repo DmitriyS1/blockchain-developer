@@ -34,10 +34,21 @@ class App extends Component {
     const networkData = Marketplace.networks[networkId]
     if(networkData) {
       const marketplace = web3.eth.Contract(Marketplace.abi, networkData.address)
-      console.log(marketplace)
+      this.setState({ marketplace })
+      const productCount = await marketplace.methods.productCount().call()
+      console.log(productCount.toString())
+      this.setState({loading: false})
     } else {
       window.alert('Marketplace contract not deployed to detected network.')
     }
+  }
+
+  createProduct(name, price) {
+    this.setState({ loading: true })
+    this.state.marketplace.methods.createProduct(name, price).send({ from: this.state.account })
+      .once('receipt', (receipt) => {
+        this.setState({ loading: false })
+      })
   }
 
   constructor(props) {
@@ -48,6 +59,7 @@ class App extends Component {
       products: [],
       loading: true
     }
+    this.createProduct = this.createProduct.bind(this)
   }
 
   render() {
@@ -58,13 +70,7 @@ class App extends Component {
           <div className="row">
             <main role="main" className="col-lg-12 d-flex text-center">
               <div className="content mr-auto ml-auto">
-                <a
-                  href="http://www.dappuniversity.com/bootcamp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src={logo} className="App-logo" alt="logo" />
-                </a>
+                <img src={logo} className="App-logo" alt="logo" />
                 <h1>Ethereum marketplace</h1>
                 <p>
                   Edit <code>src/components/App.js</code> and save to reload.
