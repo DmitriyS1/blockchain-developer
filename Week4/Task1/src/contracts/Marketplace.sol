@@ -37,9 +37,9 @@ contract Marketplace {
         require(bytes(_name).length > 0);
         require(_price > 0);
 
-        productCount ++;
+        productCount++;
         products[productCount] = Product(productCount, _name, _price, msg.sender, false);
-        
+
         emit ProductCreated(productCount, _name, _price, msg.sender, false);
     }
 
