@@ -4,6 +4,7 @@ import logo from '../logo.png';
 import './App.css';
 import Marketplace from '../abis/Marketplace.json'
 import Navbar from './Navbar'
+import Main from './Main'
 
 class App extends Component {
 
@@ -68,14 +69,11 @@ class App extends Component {
         <Navbar account={this.state.account} />
         <div className="container-fluid mt-5">
           <div className="row">
-            <main role="main" className="col-lg-12 d-flex text-center">
-              <div className="content mr-auto ml-auto">
-                <img src={logo} className="App-logo" alt="logo" />
-                <h1>Ethereum marketplace</h1>
-                <p>
-                  Edit <code>src/components/App.js</code> and save to reload.
-                </p>
-              </div>
+            <main role="main" className="col-lg-12 d-flex">
+              {this.state.loading
+                ? <div id="loader" className="text-center"><p className="text-center">Loading...</p></div>
+                : <Main createProduct={this.createProduct} />
+              }
             </main>
           </div>
         </div>
