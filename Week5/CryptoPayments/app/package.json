@@ -1,0 +1,11 @@
+{
+  "name": "crypto_payments",
+  "version": "1.0.0",
+  "description": "Accept payments in crypt without breaking the law",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "DmitriyS1",
+  "license": "ISC"
+}

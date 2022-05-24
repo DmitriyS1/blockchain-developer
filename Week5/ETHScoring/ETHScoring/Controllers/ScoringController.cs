@@ -34,7 +34,7 @@ namespace ETHScoring.Controllers
             CancellationToken ct = default)
         {
             var transactions = await GetTransactions(address, ct);
-            // Full year of transactions (more than 100, more than 70, more than 50)
+            // Full year of transactions (more than 70, more than 45, more than 20)
             // Transactions for the particular shop (more than 5, more than 2, 1)
             // Not only input transactions (input/output: 50/50, 25/75, 75/25)
             // Сделать займ, а передавать покупку только после полной оплаты
@@ -64,6 +64,19 @@ namespace ETHScoring.Controllers
             }
 
             return transactions;
+        }
+
+        private ScoringResult AnalyzeTransactions(List<TransactionItem> transactions, string shopAddress)
+        {
+            var res = new ScoringResult { CountOfTransactions = transactions.Count };
+            var shoppingTransactions = transactions.Where(t => t.To == shopAddress).ToList();
+            res.IsShopCustomer = shoppingTransactions.Count > 0;
+            if (res.IsShopCustomer)
+            {
+                res.ShoppingTransactionsCount = shoppingTransactions.Count;
+                res.MeanShoppingTransaction = shoppingTransactions.Select(st => int.Parse(st.Value)).Sum() / res.ShoppingTransactionsCount;
+            }
+
         }
     }
 }
