@@ -79,7 +79,7 @@ function routes(app, accounts, mongodb, recievePaymentContract, OWNER_ADDRESS) {
     // mark payment as payed in system
     app.patch('/payments', async (req, res) => {
         var dbo = mongodb.db(DB_NAME);
-        const filter = {shopHash: req.body.shopHash, payerAddress: req.body.payerAddress };
+        const filter = { shopHash: req.body.shopHash, payerAddress: req.body.payerAddress };
         const opts = { upsert: false };
         const updateDoc = {
             $set: {
