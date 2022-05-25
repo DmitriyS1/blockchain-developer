@@ -34,10 +34,14 @@ contract PaymentsReciever {
         price = payment.price;
     }
 
+    // Use this to send money to the exchange or to return to user
     function withdraw(uint amount, address payable reciever) public payable restricted {
         require(
             payments[msg.sender].amount >= amount,
             "Not enough money"
+        );
+        require (
+            address(this).balance >= amount, "Not enough money"
         );
         require(withdraw_inactive == false, "Withdraw is inactive");
 
