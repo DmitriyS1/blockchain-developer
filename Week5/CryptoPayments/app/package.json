@@ -9,6 +9,7 @@
   "author": "DmitriyS1",
   "license": "ISC",
   "dependencies": {
+    "bignumber.js": "^9.0.2",
     "cors": "^2.8.5",
     "express": "^4.18.1",
     "mongodb": "^4.6.0",

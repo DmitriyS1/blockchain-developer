@@ -1,4 +1,5 @@
 const v4guid = require('uuid');
+var BigNumber = require('bignumber.js');
 const DB_NAME = "crypto";
 
 function routes(app, accounts, mongodb, recievePaymentContract, OWNER_ADDRESS) {
@@ -15,6 +16,13 @@ function routes(app, accounts, mongodb, recievePaymentContract, OWNER_ADDRESS) {
                 }
             });
         res.json(payment);
+    });
+
+    app.get('/crypto/conversions', async (req, res) => {
+        const ethPrice = 119678.37;
+        const price = (req.query.price / ethPrice);
+        let resultPrice = BigNumber(price).multipliedBy(new BigNumber(1000000000000000000n));
+        res.json({"price": resultPrice});
     });
 
     app.post('/crypto/withdraw', async (req, res) => {
@@ -47,7 +55,7 @@ function routes(app, accounts, mongodb, recievePaymentContract, OWNER_ADDRESS) {
         var newPayment = { 
             shopHash: req.body.shopHash, 
             created: Date.now(), 
-            rubAmount: req.body.shopAmount, 
+            rubAmount: req.body.rubAmount, 
             etherAmount: req.body.etherAmount, 
             payerAddress: req.body.payerAddress, 
             isPayedToShop: false,
@@ -91,6 +99,5 @@ function routes(app, accounts, mongodb, recievePaymentContract, OWNER_ADDRESS) {
         res.sendStatus(204);
     });
 }
-
 
 module.exports = routes
